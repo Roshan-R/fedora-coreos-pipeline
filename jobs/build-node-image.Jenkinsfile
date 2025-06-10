@@ -147,6 +147,16 @@ lock(resource: "build-node-image") {
                                                                   "--add-openshift-build-labels"] + label_args)
             }
         }
+        stage("Run Tests"){
+            shwrap("skopeo copy containers-storage:quay.io/myorg/myrepo:mytag oci-archive:openshift.ociarchive")
+            shwrap("git clone https://github.com/coreos/custom-coreos-disk-images")
+            shwrap("sudo ./custom-coreos-disk-images/custom-coreos-disk-images.sh --ociarchive openshift.ociarchive --platforms qemu")
+            // // rhel coreos. remember to create new dir
+            // sh "cosa init https://github.com/coreos/fedora-coreos-config"
+            // // cd into the directory
+            // sh "cosa kola run --tag 'openshift' -b rhcos --qemu-image openshift-qemu.x86_64.qcow2"
+
+        }
         stage("Brew Upload") {
             // Use the staging since we already have the disgests
             pipeutils.brew_upload(arches, params.RELEASE, registry_staging_repo, node_image_manifest_digest,
