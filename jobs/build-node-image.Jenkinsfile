@@ -149,7 +149,7 @@ lock(resource: "build-node-image") {
         }
         stage("Run Tests"){
             def digest_without_prefix = node_image_manifest_digest.replaceFirst("sha256:", "")
-            shwrap("skopeo copy containers-storage:$digest_without_prefix oci-archive:openshift.ociarchive")
+            shwrap("podman save $digest_without_prefix -o /tmp/openshift.ociarchive")
             shwrap("git clone https://github.com/coreos/custom-coreos-disk-images")
             shwrap("sudo ./custom-coreos-disk-images/custom-coreos-disk-images.sh --ociarchive openshift.ociarchive --platforms qemu")
             // // rhel coreos. remember to create new dir
