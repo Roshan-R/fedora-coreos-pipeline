@@ -153,7 +153,7 @@ lock(resource: "build-node-image") {
                 shwrap("skopeo copy --authfile $REGISTRY_AUTH_FILE docker://${registry_staging_repo}@${node_image_manifest_digest} oci-archive:./openshift.ociarchive")
                 shwrap("git clone https://github.com/coreos/custom-coreos-disk-images")
                 shwrap("sed -i 's/getenforce/echo \"Permissive\"/g' custom-coreos-disk-images/custom-coreos-disk-images.sh")
-                shwrap("sed -i 's/\$UID -ne 0/true/g' custom-coreos-disk-images/custom-coreos-disk-images.sh")
+                shwrap("sed -i 's/\\$UID -ne 0/true/g' custom-coreos-disk-images/custom-coreos-disk-images.sh")
                 shwrap("./custom-coreos-disk-images/custom-coreos-disk-images.sh --ociarchive openshift.ociarchive --platforms qemu")
                 // // rhel coreos. remember to create new dir
                 // sh "cosa init https://github.com/coreos/fedora-coreos-config"
