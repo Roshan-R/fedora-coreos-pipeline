@@ -148,14 +148,16 @@ lock(resource: "build-node-image") {
             }
         }
         stage("Run Tests"){
-            def digest_without_prefix = node_image_manifest_digest.replaceFirst("sha256:", "")
-            shwrap("podman save $digest_without_prefix -o /tmp/openshift.ociarchive")
-            shwrap("git clone https://github.com/coreos/custom-coreos-disk-images")
-            shwrap("sudo ./custom-coreos-disk-images/custom-coreos-disk-images.sh --ociarchive openshift.ociarchive --platforms qemu")
-            // // rhel coreos. remember to create new dir
-            // sh "cosa init https://github.com/coreos/fedora-coreos-config"
-            // // cd into the directory
-            // sh "cosa kola run --tag 'openshift' -b rhcos --qemu-image openshift-qemu.x86_64.qcow2"
+            withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
+                def digest_without_prefix = node_image_manifest_digest.replaceFirst("sha256:", "")
+                shwrap("skopeo copy --authfile $REGISTRY_AUTH_FILE docker://${registry_staging_repo}:${digest_without_prefix} oci-archive:./openshift.ociarchive")
+                shwrap("git clone https://github.com/coreos/custom-coreos-disk-images")
+                shwrap("sudo ./custom-coreos-disk-images/custom-coreos-disk-images.sh --ociarchive openshift.ociarchive --platforms qemu")
+                // // rhel coreos. remember to create new dir
+                // sh "cosa init https://github.com/coreos/fedora-coreos-config"
+                // // cd into the directory
+                // sh "cosa kola run --tag 'openshift' -b rhcos --qemu-image openshift-qemu.x86_64.qcow2"
+            }
 
         }
         stage("Brew Upload") {
