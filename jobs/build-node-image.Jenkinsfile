@@ -150,7 +150,7 @@ lock(resource: "build-node-image") {
         stage("Run Tests"){
             withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
                 def digest_without_prefix = node_image_manifest_digest.replaceFirst("sha256:", "")
-                shwrap("skopeo copy --authfile $REGISTRY_AUTH_FILE docker://${registry_staging_repo}:${digest_without_prefix} oci-archive:./openshift.ociarchive")
+                shwrap("skopeo copy --authfile $REGISTRY_AUTH_FILE docker://${registry_staging_repo}@${node_image_manifest_digest} oci-archive:./openshift.ociarchive")
                 shwrap("git clone https://github.com/coreos/custom-coreos-disk-images")
                 shwrap("sudo ./custom-coreos-disk-images/custom-coreos-disk-images.sh --ociarchive openshift.ociarchive --platforms qemu")
                 // // rhel coreos. remember to create new dir
