@@ -147,10 +147,12 @@ lock(resource: "build-node-image") {
                                                                   "--add-openshift-build-labels"] + label_args)
             }
         }
-        stage("Brew Upload") {
-            // Use the staging since we already have the disgests
-            pipeutils.brew_upload(arches, params.RELEASE, registry_staging_repo, node_image_manifest_digest,
-                                  extensions_image_manifest_digest, timestamp, pipecfg)
+        if (!stream_info.skip_brew_upload){
+            stage("Brew Upload") {
+                // Use the staging since we already have the disgests
+                pipeutils.brew_upload(arches, params.RELEASE, registry_staging_repo, node_image_manifest_digest,
+                                      extensions_image_manifest_digest, timestamp, pipecfg)
+            }
         }
         stage("Release Manifests") {
             withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
