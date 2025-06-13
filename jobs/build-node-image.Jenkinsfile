@@ -151,7 +151,7 @@ lock(resource: "build-node-image") {
             withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
                 def digest_without_prefix = node_image_manifest_digest.replaceFirst("sha256:", "")
                 shwrap("skopeo copy --authfile $REGISTRY_AUTH_FILE docker://${registry_staging_repo}@${node_image_manifest_digest} oci-archive:./openshift.ociarchive")
-                shwrap("git clone https://github.com/coreos/custom-coreos-disk-images")
+                shwrap("git clone https://github.com/Roshan-R/custom-coreos-disk-images")
                 shwrap("cd custom-coreos-disk-images && git checkout temp-fix")
                 // shwrap("sed -i 's/getenforce/echo \"Permissive\"/g' custom-coreos-disk-images/custom-coreos-disk-images.sh")
                 // shwrap("sed -i 's/\\\$UID -ne 0/true/g' custom-coreos-disk-images/custom-coreos-disk-images.sh")
