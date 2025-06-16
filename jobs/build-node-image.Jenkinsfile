@@ -147,6 +147,22 @@ lock(resource: "build-node-image") {
                                                                   "--add-openshift-build-labels"] + label_args)
             }
         }
+        stage("Run Tests"){
+            withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
+                def digest_without_prefix = node_image_manifest_digest.replaceFirst("sha256:", "")
+                shwrap("skopeo copy --authfile $REGISTRY_AUTH_FILE docker://${registry_staging_repo}@${node_image_manifest_digest} oci-archive:./openshift.ociarchive")
+                shwrap("git clone https://github.com/Roshan-R/custom-coreos-disk-images")
+                shwrap("cd custom-coreos-disk-images && git checkout temp-fix")
+                // shwrap("sed -i 's/getenforce/echo \"Permissive\"/g' custom-coreos-disk-images/custom-coreos-disk-images.sh")
+                // shwrap("sed -i 's/\\\$UID -ne 0/true/g' custom-coreos-disk-images/custom-coreos-disk-images.sh")
+                shwrap("./custom-coreos-disk-images/custom-coreos-disk-images.sh --ociarchive openshift.ociarchive --platforms qemu")
+                // // rhel coreos. remember to create new dir
+                // sh "cosa init https://github.com/coreos/fedora-coreos-config"
+                // // cd into the directory
+                // sh "cosa kola run --tag 'openshift' -b rhcos --qemu-image openshift-qemu.x86_64.qcow2"
+            }
+
+        }
         stage("Brew Upload") {
             // Use the staging since we already have the disgests
             pipeutils.brew_upload(arches, params.RELEASE, registry_staging_repo, node_image_manifest_digest,
