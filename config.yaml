@@ -109,6 +109,13 @@ clouds:
   openstack:
     test_architectures: [x86_64, aarch64]
 
+hotfix:
+  # REQUIRED: name for hotfix used to tag pushed resources
+  name: skip-brew-upload
+  # OPTIONAL/TEMPORARY: skip all tests that require a signed kernel
+  # skip_secureboot_tests_hack: true
+
+
 misc:
   versionary: true
   generate_release_index: true
