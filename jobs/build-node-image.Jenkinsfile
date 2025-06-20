@@ -50,7 +50,7 @@ def src_config_url = stream_info.source_config.url
 
 lock(resource: "build-node-image") {
     cosaPod(image: params.COREOS_ASSEMBLER_IMAGE,
-            memory: "512Mi", kvm: false,
+            memory: "512Mi", kvm: true,
             serviceAccount: "jenkins",
             secrets: ["brew-keytab", "brew-ca:ca.crt:/etc/pki/ca.crt",
                       "koji-conf:koji.conf:/etc/koji.conf",
