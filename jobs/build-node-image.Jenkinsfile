@@ -155,7 +155,18 @@ lock(resource: "build-node-image") {
                 shwrap("cd custom-coreos-disk-images && git checkout temp-fix")
                 // shwrap("sed -i 's/getenforce/echo \"Permissive\"/g' custom-coreos-disk-images/custom-coreos-disk-images.sh")
                 // shwrap("sed -i 's/\\\$UID -ne 0/true/g' custom-coreos-disk-images/custom-coreos-disk-images.sh")
-                shwrap("./custom-coreos-disk-images/custom-coreos-disk-images.sh --ociarchive openshift.ociarchive --platforms qemu")
+
+                // Supermin needs a tmp/ and cache/ dir to work
+                shwrap("mkdir tmp cache")
+                shwrap("cosa supermin-run ./custom-coreos-disk-images/custom-coreos-disk-images.sh --ociarchive openshift.ociarchive --platforms qemu")
+
+                shwrap("""
+                    mkdir coreos
+                    cd coreos
+                    cosa init https://github.com/coreos/fedora-coreos-config
+                    cosa kola run --tag 'openshift' -b rhcos --qemu-image ../openshift-qemu.x86_64.qcow2
+                """)
+
                 // // rhel coreos. remember to create new dir
                 // sh "cosa init https://github.com/coreos/fedora-coreos-config"
                 // // cd into the directory
