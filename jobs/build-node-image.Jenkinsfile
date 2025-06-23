@@ -158,7 +158,7 @@ lock(resource: "build-node-image") {
 
                 // Supermin needs a tmp/ and cache/ dir to work
                 shwrap("mkdir tmp cache")
-                shwrap("cosa supermin-run ./custom-coreos-disk-images/custom-coreos-disk-images.sh --ociarchive openshift.ociarchive --platforms qemu")
+                shwrap("cosa supermin-run --cache ./custom-coreos-disk-images/custom-coreos-disk-images.sh --ociarchive openshift.ociarchive --platforms qemu")
 
                 shwrap("""
                     mkdir coreos
