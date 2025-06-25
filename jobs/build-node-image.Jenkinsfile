@@ -110,7 +110,7 @@ lock(resource: "build-node-image") {
                 def rhel_stream = params.RELEASE.split("-")[1]
 
                 // TODO: Make use of this shwrap("skopeo copy --authfile $REGISTRY_AUTH_FILE docker://${registry_staging_repo}@${node_image_manifest_digest} oci-archive:./openshift.ociarchive")
-                shwrap("skopeo copy --authfile $REGISTRY_AUTH_FILE docker://${registry_staging_repo}@latest oci-archive:./openshift.ociarchive")
+                shwrap("skopeo copy --authfile $REGISTRY_AUTH_FILE docker://${registry_staging_repo} oci-archive:./openshift.ociarchive")
                 // TODO: handle multiple architectures
                 shwrap("""
                     mkdir tmp
