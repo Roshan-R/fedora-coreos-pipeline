@@ -125,28 +125,7 @@ lock(resource: "build-node-image") {
                                                                    "--add-openshift-build-labels"] + label_args)
             }
         }
-        stage('Build Extensions Image') {
-            withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
-                // Use the node image as from
-                def build_from = "${registry_staging_repo}@${node_image_manifest_digest}"
-                def label_args = []
-                if (unique_tag != "") {
-                    label_args = ["--label", "coreos.build.manifest-list-tag=${unique_tag}-extensions"]
-                }
-                extensions_image_manifest_digest = pipeutils.build_and_push_image(arches: arches,
-                                               src_commit: commit,
-                                               src_url: src_config_url,
-                                               staging_repository: registry_staging_repo,
-                                               image_tag_staging: "${registry_staging_tag}-extensions",
-                                               manifest_tag_staging: "${registry_staging_tag}-extensions",
-                                               secret: "id=yumrepos,src=${yumrepos_file}", // notsecret (for secret scanners)
-                                               from: build_from,
-                                               v2s2: v2s2,
-                                               extra_build_args: ["--security-opt label=disable", "--mount-host-ca-certs",
-                                                                  "--git-containerfile", "extensions/Dockerfile", "--force",
-                                                                  "--add-openshift-build-labels"] + label_args)
-            }
-        }
+        // TODO: move the stage one down
         stage("Run Tests"){
             withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
                 def rhel_stream = params.RELEASE.split("-")[1]
@@ -173,6 +152,28 @@ lock(resource: "build-node-image") {
                 // sh "cosa kola run --tag 'openshift' -b rhcos --qemu-image openshift-qemu.x86_64.qcow2"
             }
 
+        }
+        stage('Build Extensions Image') {
+            withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
+                // Use the node image as from
+                def build_from = "${registry_staging_repo}@${node_image_manifest_digest}"
+                def label_args = []
+                if (unique_tag != "") {
+                    label_args = ["--label", "coreos.build.manifest-list-tag=${unique_tag}-extensions"]
+                }
+                extensions_image_manifest_digest = pipeutils.build_and_push_image(arches: arches,
+                                               src_commit: commit,
+                                               src_url: src_config_url,
+                                               staging_repository: registry_staging_repo,
+                                               image_tag_staging: "${registry_staging_tag}-extensions",
+                                               manifest_tag_staging: "${registry_staging_tag}-extensions",
+                                               secret: "id=yumrepos,src=${yumrepos_file}", // notsecret (for secret scanners)
+                                               from: build_from,
+                                               v2s2: v2s2,
+                                               extra_build_args: ["--security-opt label=disable", "--mount-host-ca-certs",
+                                                                  "--git-containerfile", "extensions/Dockerfile", "--force",
+                                                                  "--add-openshift-build-labels"] + label_args)
+            }
         }
         stage("Brew Upload") {
             // Use the staging since we already have the disgests
