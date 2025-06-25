@@ -113,7 +113,7 @@ lock(resource: "build-node-image") {
                 shwrap("echo ${s3_stream_dir}")
                 pipeutils.shwrapWithAWSBuildUploadCredentials("""
                     mkdir tmp
-                    cosa buildfetch --build=${params.VERSION} \
+                    cosa buildfetch --build=${params.RELEASE} \
                         --arch=all --url=s3://${s3_stream_dir}/builds \
                         --aws-config-file \${AWS_BUILD_UPLOAD_CONFIG}
                 """)
