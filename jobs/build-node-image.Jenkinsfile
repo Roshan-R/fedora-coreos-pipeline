@@ -104,28 +104,7 @@ lock(resource: "build-node-image") {
             archiveArtifacts 'all.repo'
         }
 
-        stage('Build Node Image') {
-            withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
-                 def build_from = params.FROM ?: stream_info.from
-                 def label_args = []
-                 if (unique_tag != "") {
-                     label_args = ["--label", "coreos.build.manifest-list-tag=${unique_tag}"]
-                 }
-
-                 node_image_manifest_digest = pipeutils.build_and_push_image(arches: arches,
-                                                src_commit: commit,
-                                                src_url: src_config_url,
-                                                staging_repository: registry_staging_repo,
-                                                image_tag_staging: registry_staging_tag,
-                                                manifest_tag_staging: "${registry_staging_tag}",
-                                                secret: "id=yumrepos,src=${yumrepos_file}", // notsecret (for secret scanners)
-                                                from: build_from,
-                                                v2s2: v2s2,
-                                                extra_build_args: ["--security-opt label=disable", "--mount-host-ca-certs", "--force",
-                                                                   "--add-openshift-build-labels"] + label_args)
-            }
-        }
-        // TODO: move the stage one down
+        // TODO: move the stage to after build extensions image
         stage("Run Tests"){
             withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
                 def rhel_stream = params.RELEASE.split("-")[1]
@@ -151,6 +130,28 @@ lock(resource: "build-node-image") {
                 // // cd into the directory
                 // sh "cosa kola run --tag 'openshift' -b rhcos --qemu-image openshift-qemu.x86_64.qcow2"
             }
+
+        stage('Build Node Image') {
+            withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
+                 def build_from = params.FROM ?: stream_info.from
+                 def label_args = []
+                 if (unique_tag != "") {
+                     label_args = ["--label", "coreos.build.manifest-list-tag=${unique_tag}"]
+                 }
+
+                 node_image_manifest_digest = pipeutils.build_and_push_image(arches: arches,
+                                                src_commit: commit,
+                                                src_url: src_config_url,
+                                                staging_repository: registry_staging_repo,
+                                                image_tag_staging: registry_staging_tag,
+                                                manifest_tag_staging: "${registry_staging_tag}",
+                                                secret: "id=yumrepos,src=${yumrepos_file}", // notsecret (for secret scanners)
+                                                from: build_from,
+                                                v2s2: v2s2,
+                                                extra_build_args: ["--security-opt label=disable", "--mount-host-ca-certs", "--force",
+                                                                   "--add-openshift-build-labels"] + label_args)
+            }
+        }
 
         }
         stage('Build Extensions Image') {
