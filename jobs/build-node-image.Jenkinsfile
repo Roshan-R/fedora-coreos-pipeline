@@ -157,14 +157,20 @@ lock(resource: "build-node-image") {
                 // shwrap("sed -i 's/\\\$UID -ne 0/true/g' custom-coreos-disk-images/custom-coreos-disk-images.sh")
 
                 // Supermin needs a tmp/ and cache/ dir to work
-                shwrap("mkdir tmp cache")
-                shwrap("cosa supermin-run --cache ./custom-coreos-disk-images/custom-coreos-disk-images.sh --ociarchive openshift.ociarchive --platforms qemu")
+                // shwrap("mkdir tmp cache")
+                // shwrap("cosa supermin-run --cache ./custom-coreos-disk-images/custom-coreos-disk-images.sh --ociarchive openshift.ociarchive --platforms qemu")
+
+                shwrap("""
+                    curl -L -O https://releases-rhcos--prod-pipeline.apps.int.prod-stable-spoke1-dc-iad2.itup.redhat.com/storage/releases/rhcos-4.10/410.84.202212022239-0/x86_64/rhcos-410.84.202212022239-0-qemu.x86_64.qcow2.gz
+                    gunzip rhcos-410.84.202212022239-0-qemu.x86_64.qcow2.gz
+                    mv rhcos-410.84.202212022239-0-qemu.x86_64.qcow2 rhcos.qcow2
+                """)
 
                 shwrap("""
                     mkdir coreos
                     cd coreos
                     cosa init https://github.com/coreos/fedora-coreos-config
-                    cosa kola run --tag 'openshift' -b rhcos --qemu-image ../openshift-qemu.x86_64.qcow2
+                    cosa kola run --tag 'openshift' -b rhcos --qemu-image rhcos.qcow2 --oscontainer openshift.ociarchive
                 """)
 
                 // // rhel coreos. remember to create new dir
