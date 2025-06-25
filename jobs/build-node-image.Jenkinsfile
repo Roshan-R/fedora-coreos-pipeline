@@ -109,12 +109,21 @@ lock(resource: "build-node-image") {
             withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
                 def rhel_stream = params.RELEASE.split("-")[1]
 
+                def s3_stream_dir = pipeutils.get_s3_streams_dir(pipecfg, params.STREAM)
+                shwrap("echo ${s3_stream_dir}")
+                pipeutils.shwrapWithAWSBuildUploadCredentials("""
+                    mkdir tmp
+                    cosa buildfetch --build=${params.VERSION} \
+                        --arch=all --url=s3://${s3_stream_dir}/builds \
+                        --aws-config-file \${AWS_BUILD_UPLOAD_CONFIG}
+                """)
+
+
                 // TODO: Make use of this shwrap("skopeo copy --authfile $REGISTRY_AUTH_FILE docker://${registry_staging_repo}@${node_image_manifest_digest} oci-archive:./openshift.ociarchive")
                 shwrap("skopeo copy --authfile $REGISTRY_AUTH_FILE docker://${registry_staging_repo} oci-archive:./openshift.ociarchive")
                 // TODO: handle multiple architectures
                 shwrap("""
-                    mkdir tmp
-                    cosa buildfetch --url 'https://releases-rhcos--prod-pipeline.apps.int.prod-stable-spoke1-dc-iad2.itup.redhat.com/storage/prod/streams/rhel-${rhel_stream}/builds' --arch x86_64 --stream latest --artifact qemu
+                    # cosa buildfetch --url 'https://releases-rhcos--prod-pipeline.apps.int.prod-stable-spoke1-dc-iad2.itup.redhat.com/storage/prod/streams/rhel-${rhel_stream}/builds' --arch x86_64 --stream latest --artifact qemu
                     cp builds/latest/x86_64/*.gzip rhcos.qcow2.gz
                     gunzip rhcos.qcow2.gz
                 """)
