@@ -109,7 +109,7 @@ lock(resource: "build-node-image") {
             withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
                 def rhel_stream = params.RELEASE.split("-")[1]
 
-                def s3_stream_dir = pipeutils.get_s3_streams_dir(pipecfg, params.STREAM)
+                def s3_stream_dir = pipeutils.get_s3_streams_dir(pipecfg, "rhel-9.6")
                 shwrap("echo ${s3_stream_dir}")
                 pipeutils.shwrapWithAWSBuildUploadCredentials("""
                     mkdir tmp
