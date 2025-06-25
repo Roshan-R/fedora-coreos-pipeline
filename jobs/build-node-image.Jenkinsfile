@@ -149,21 +149,12 @@ lock(resource: "build-node-image") {
         }
         stage("Run Tests"){
             withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
-                def digest_without_prefix = node_image_manifest_digest.replaceFirst("sha256:", "")
                 shwrap("skopeo copy --authfile $REGISTRY_AUTH_FILE docker://${registry_staging_repo}@${node_image_manifest_digest} oci-archive:./openshift.ociarchive")
-                shwrap("git clone https://github.com/Roshan-R/custom-coreos-disk-images")
-                shwrap("cd custom-coreos-disk-images && git checkout temp-fix")
-                // shwrap("sed -i 's/getenforce/echo \"Permissive\"/g' custom-coreos-disk-images/custom-coreos-disk-images.sh")
-                // shwrap("sed -i 's/\\\$UID -ne 0/true/g' custom-coreos-disk-images/custom-coreos-disk-images.sh")
-
-                // Supermin needs a tmp/ and cache/ dir to work
-                // shwrap("mkdir tmp cache")
-                // shwrap("cosa supermin-run --cache ./custom-coreos-disk-images/custom-coreos-disk-images.sh --ociarchive openshift.ociarchive --platforms qemu")
-
+                // TODO: handle multiple architectures
                 shwrap("""
-                    curl -L -O https://releases-rhcos--prod-pipeline.apps.int.prod-stable-spoke1-dc-iad2.itup.redhat.com/storage/releases/rhcos-4.10/410.84.202212022239-0/x86_64/rhcos-410.84.202212022239-0-qemu.x86_64.qcow2.gz
-                    gunzip rhcos-410.84.202212022239-0-qemu.x86_64.qcow2.gz
-                    mv rhcos-410.84.202212022239-0-qemu.x86_64.qcow2 rhcos.qcow2
+                    cosa buildfetch --url 'https://releases-rhcos--prod-pipeline.apps.int.prod-stable-spoke1-dc-iad2.itup.redhat.com/?stream=prod/streams/${params.RELEASE}' --arch x86_64 --stream latest --artifact qemu
+                    cp builds/latest/x86_64/*.gzip rhcos.qcow2.gz
+                    gunzip rhcos.qcow2.gz
                 """)
 
                 shwrap("""
