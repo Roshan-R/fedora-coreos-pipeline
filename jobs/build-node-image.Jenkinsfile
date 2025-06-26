@@ -109,12 +109,10 @@ lock(resource: "build-node-image") {
             withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
                 def rhel_stream = params.RELEASE.split("-")[1]
 
-                def s3_stream_dir = pipeutils.get_s3_streams_dir(pipecfg, params.RELEASE)
-                shwrap("echo ${s3_stream_dir}")
                 pipeutils.shwrapWithAWSBuildUploadCredentials("""
                     mkdir tmp
                     cosa buildfetch \
-                        --arch=all --url=s3://art-rhcos-ci/prod/streams/rhel-9.6/builds \
+                        --arch=x86_64 --artifact qemu --url=s3://art-rhcos-ci/prod/streams/rhel-${rhel_stream}/builds \
                         --aws-config-file \${AWS_BUILD_UPLOAD_CONFIG}
                 """)
 
