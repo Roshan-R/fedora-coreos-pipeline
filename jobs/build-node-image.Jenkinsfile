@@ -109,12 +109,12 @@ lock(resource: "build-node-image") {
             withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
                 def rhel_stream = params.RELEASE.split("-")[1]
 
-                def s3_stream_dir = pipeutils.get_s3_streams_dir(pipecfg, "rhel-9.6")
+                def s3_stream_dir = pipeutils.get_s3_streams_dir(pipecfg, params.RELEASE)
                 shwrap("echo ${s3_stream_dir}")
                 pipeutils.shwrapWithAWSBuildUploadCredentials("""
                     mkdir tmp
                     cosa buildfetch \
-                        --arch=all --url=s3://${params.RELEASE}/builds \
+                        --arch=all --url=s3://${s3_stream_dir}/builds \
                         --aws-config-file \${AWS_BUILD_UPLOAD_CONFIG}
                 """)
 
