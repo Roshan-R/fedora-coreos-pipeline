@@ -130,7 +130,7 @@ lock(resource: "build-node-image") {
                     mkdir coreos
                     cd coreos
                     cosa init https://github.com/coreos/fedora-coreos-config
-                    cosa kola run --tag 'openshift' -b rhcos --qemu-image rhcos.qcow2 --oscontainer openshift.ociarchive
+                    cosa kola run --tag 'openshift' -b rhcos --qemu-image ../rhcos.qcow2 --oscontainer ../openshift.ociarchive
                 """)
 
                 // // rhel coreos. remember to create new dir
