@@ -114,7 +114,7 @@ lock(resource: "build-node-image") {
                 pipeutils.shwrapWithAWSBuildUploadCredentials("""
                     mkdir tmp
                     cosa buildfetch \
-                        --arch=all --url=s3://${s3_stream_dir}/builds --stream ${params.RELEASE}\
+                        --arch=all --url=s3://art-rhcos-ci/prod/streams/rhel-9.6/builds \
                         --aws-config-file \${AWS_BUILD_UPLOAD_CONFIG}
                 """)
 
