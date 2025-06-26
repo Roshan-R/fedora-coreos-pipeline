@@ -122,7 +122,7 @@ lock(resource: "build-node-image") {
                 // TODO: handle multiple architectures
                 shwrap("""
                     # cosa buildfetch --url 'https://releases-rhcos--prod-pipeline.apps.int.prod-stable-spoke1-dc-iad2.itup.redhat.com/storage/prod/streams/rhel-${rhel_stream}/builds' --arch x86_64 --stream latest --artifact qemu
-                    cp builds/latest/x86_64/*.gzip rhcos.qcow2.gz
+                    cp builds/latest/x86_64/*.gz rhcos.qcow2.gz
                     gunzip rhcos.qcow2.gz
                 """)
 
