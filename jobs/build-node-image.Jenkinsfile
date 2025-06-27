@@ -50,7 +50,7 @@ def src_config_url = stream_info.source_config.url
 
 lock(resource: "build-node-image") {
     cosaPod(image: params.COREOS_ASSEMBLER_IMAGE,
-            memory: "512Mi", kvm: true,
+            memory: "2Gi", kvm: true,
             serviceAccount: "jenkins",
             secrets: ["brew-keytab", "brew-ca:ca.crt:/etc/pki/ca.crt",
                       "koji-conf:koji.conf:/etc/koji.conf",
@@ -130,7 +130,7 @@ lock(resource: "build-node-image") {
                     mkdir coreos
                     cd coreos
                     cosa init https://github.com/coreos/fedora-coreos-config
-                    cosa run --qemu-image ../rhcos.qcow2 --devshell-console
+                    # cosa run --qemu-image ../rhcos.qcow2 --devshell-console
                     cosa kola run --tag 'openshift' -b rhcos --qemu-image ../rhcos.qcow2 --oscontainer ../openshift.ociarchive
                 """)
 
