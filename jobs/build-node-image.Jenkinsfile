@@ -152,27 +152,30 @@ lock(resource: "build-node-image") {
             withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
                 def rhel_stream = params.RELEASE.split("-")[1]
 
+                // TODO: handle multiple architectures
                 pipeutils.shwrapWithAWSBuildUploadCredentials("""
                     mkdir tmp
                     cosa buildfetch \
                         --arch=x86_64 --artifact qemu --url=s3://art-rhcos-ci/prod/streams/rhel-${rhel_stream}/builds \
                         --aws-config-file \${AWS_BUILD_UPLOAD_CONFIG}
+                    cp builds/latest/x86_64/*.gz rhcos.qcow2.gz
+                    gunzip rhcos.qcow2.gz
                 """)
 
 
                 shwrap("skopeo copy --authfile $REGISTRY_AUTH_FILE docker://${registry_staging_repo}@${node_image_manifest_digest} oci-archive:./openshift.ociarchive")
-                // TODO: handle multiple architectures
-                shwrap("""
-                    # cosa buildfetch --url 'https://releases-rhcos--prod-pipeline.apps.int.prod-stable-spoke1-dc-iad2.itup.redhat.com/storage/prod/streams/rhel-${rhel_stream}/builds' --arch x86_64 --stream latest --artifact qemu
-                    cp builds/latest/x86_64/*.gz rhcos.qcow2.gz
-                    gunzip rhcos.qcow2.gz
-                """)
 
                 shwrap("""
                     mkdir coreos
                     cd coreos
                     cosa init https://github.com/coreos/fedora-coreos-config
-                    # cosa run --qemu-image ../rhcos.qcow2 --devshell-console
+                    cosa kola run --tag 'openshift' -b rhcos --qemu-image ../rhcos.qcow2 --oscontainer ../openshift.ociarchive
+                """)
+
+                shwrap("""
+                    mkdir rhcos
+                    cd rhcos
+                    cosa init https://github.com/coreos/rhel-coreos-config
                     cosa kola run --tag 'openshift' -b rhcos --qemu-image ../rhcos.qcow2 --oscontainer ../openshift.ociarchive
                 """)
 
