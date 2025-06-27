@@ -173,10 +173,10 @@ lock(resource: "build-node-image") {
                 """)
 
                 shwrap("""
-                    mkdir rhcos
-                    cd rhcos
-                    cosa init https://github.com/coreos/rhel-coreos-config
-                    cosa kola run --tag 'openshift' -b rhcos --qemu-image ../rhcos.qcow2 --oscontainer ../openshift.ociarchive
+                    mkdir openshift
+                    cd openshift
+                    cosa init https://github.com/openshift/os --branch release-4.19
+                    cosa kola run -E src/config --tag 'openshift' -b rhcos --qemu-image ../rhcos.qcow2 --oscontainer ../openshift.ociarchive
                 """)
 
                 // // rhel coreos. remember to create new dir
