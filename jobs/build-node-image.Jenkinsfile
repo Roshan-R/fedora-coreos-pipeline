@@ -150,6 +150,7 @@ lock(resource: "build-node-image") {
         }
         stage("Run Tests"){
             withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
+                def openshift_stream = params.RELEASE.split("-")[0]
                 def rhel_stream = params.RELEASE.split("-")[1]
 
                 // TODO: handle multiple architectures
@@ -175,7 +176,7 @@ lock(resource: "build-node-image") {
                 shwrap("""
                     mkdir openshift
                     cd openshift
-                    cosa init https://github.com/openshift/os --branch release-4.19
+                    cosa init https://github.com/openshift/os --branch release-${openshift_stream}
                     cosa kola run -E src/config --tag 'openshift' -b rhcos --qemu-image ../rhcos.qcow2 --oscontainer ../openshift.ociarchive
                 """)
 
