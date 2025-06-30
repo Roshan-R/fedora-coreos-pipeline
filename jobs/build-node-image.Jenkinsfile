@@ -50,7 +50,7 @@ def src_config_url = stream_info.source_config.url
 
 lock(resource: "build-node-image") {
     cosaPod(image: params.COREOS_ASSEMBLER_IMAGE,
-            memory: "512Mi", kvm: false,
+            memory: "2Gi", kvm: true,
             serviceAccount: "jenkins",
             secrets: ["brew-keytab", "brew-ca:ca.crt:/etc/pki/ca.crt",
                       "koji-conf:koji.conf:/etc/koji.conf",
@@ -125,6 +125,7 @@ lock(resource: "build-node-image") {
                                                                    "--add-openshift-build-labels"] + label_args)
             }
         }
+
         stage('Build Extensions Image') {
             withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
                 // Use the node image as from
@@ -145,6 +146,44 @@ lock(resource: "build-node-image") {
                                                extra_build_args: ["--security-opt label=disable", "--mount-host-ca-certs",
                                                                   "--git-containerfile", "extensions/Dockerfile", "--force",
                                                                   "--add-openshift-build-labels"] + label_args)
+            }
+        }
+        stage("Run Tests"){
+            withCredentials([file(credentialsId: 'oscontainer-push-registry-secret', variable: 'REGISTRY_AUTH_FILE')]) {
+                def openshift_stream = params.RELEASE.split("-")[0]
+                def rhel_stream = params.RELEASE.split("-")[1]
+
+                // TODO: handle multiple architectures
+                pipeutils.shwrapWithAWSBuildUploadCredentials("""
+                    mkdir tmp
+                    cosa buildfetch \
+                        --arch=x86_64 --artifact qemu --url=s3://art-rhcos-ci/prod/streams/rhel-${rhel_stream}/builds \
+                        --aws-config-file \${AWS_BUILD_UPLOAD_CONFIG}
+                    cp builds/latest/x86_64/*.gz rhcos.qcow2.gz
+                    gunzip rhcos.qcow2.gz
+                """)
+
+
+                shwrap("skopeo copy --authfile $REGISTRY_AUTH_FILE docker://${registry_staging_repo}@${node_image_manifest_digest} oci-archive:./openshift.ociarchive")
+
+                shwrap("""
+                    mkdir coreos
+                    cd coreos
+                    cosa init https://github.com/coreos/fedora-coreos-config
+                    cosa kola run --tag 'openshift' -b rhcos --qemu-image ../rhcos.qcow2 --oscontainer ../openshift.ociarchive
+                """)
+
+                shwrap("""
+                    mkdir openshift
+                    cd openshift
+                    cosa init https://github.com/openshift/os --branch release-${openshift_stream}
+                    cosa kola run -E src/config --tag 'openshift' -b rhcos --qemu-image ../rhcos.qcow2 --oscontainer ../openshift.ociarchive
+                """)
+
+                // // rhel coreos. remember to create new dir
+                // sh "cosa init https://github.com/coreos/fedora-coreos-config"
+                // // cd into the directory
+                // sh "cosa kola run --tag 'openshift' -b rhcos --qemu-image openshift-qemu.x86_64.qcow2"
             }
         }
         stage("Brew Upload") {
