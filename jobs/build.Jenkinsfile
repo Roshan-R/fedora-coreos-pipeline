@@ -337,7 +337,7 @@ lock(resource: "build-${params.STREAM}") {
             stage("Import OCI image"){
                 echo "Skiping Build"
                 echo "Source OCI Image: $source_oci_image"
-                shwrap("cosa import docker://${source_oci_image}")
+                shwrap("cosa import docker://${source_oci_image} --skip-prune")
                 def builds = readJSON file: "builds/builds.json"
                 newBuildID = builds.builds[0].id
             }
