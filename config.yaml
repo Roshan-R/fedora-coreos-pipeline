@@ -8,7 +8,7 @@ streams:
   testing-devel:
     type: development
     # temporarily using sha256 tag as konflux builds do not have the latest tag
-    source_oci_image: docker://quay.io/konflux-fedora/coreos-tenant/fedora-coreos-rawhide@sha256:a0268014587489cbf36564c9a70948fb16bbaede01dc68cbf6bddc17e41e3f6b
+    source_oci_image: quay.io/konflux-fedora/coreos-tenant/fedora-coreos-rawhide@sha256:a0268014587489cbf36564c9a70948fb16bbaede01dc68cbf6bddc17e41e3f6b
     default: true
   # next-devel:         # do not touch; line managed by `next-devel/manage.py`
     # type: development # do not touch; line managed by `next-devel/manage.py`
