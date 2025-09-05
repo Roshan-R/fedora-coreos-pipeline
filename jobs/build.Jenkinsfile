@@ -388,7 +388,8 @@ lock(resource: "build-${params.STREAM}") {
                  skipUpgrade: pipecfg.hacks?.skip_upgrade_tests,
                  allowUpgradeFail: params.ALLOW_KOLA_UPGRADE_FAILURE,
                  skipSecureBoot: pipecfg.hotfix?.skip_secureboot_tests_hack,
-                 skipKolaTags: stream_info.skip_kola_tags)
+                 skipKolaTags: stream_info.skip_kola_tags,
+                 extraArgs: "--denylist-stream ${params.STREAM}")
         }
 
         // If desired let's go ahead and archive+fork the multi-arch jobs
