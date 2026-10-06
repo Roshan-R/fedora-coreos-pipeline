@@ -13,6 +13,10 @@ streams:
   rawhide:
     type: development
     konflux_driven: true
+    konflux_api_url: https://api.kflux-fedora-01.84db.p1.openshiftapps.com:6443
+    konflux_namespace: coreos-tenant
+    konflux_application: fedora-coreos-testing-devel
+    konflux_token_credential: konflux-bot-0
   # branched:
   #   type: development
 
@@ -120,3 +124,4 @@ misc:
   run_extended_upgrade_test_fcos: true
   allow_missing_architectures_when_autotriggering_release_job: true
   allow_skip_of_untested_artifacts: true
+
